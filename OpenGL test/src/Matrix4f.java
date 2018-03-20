@@ -1,0 +1,123 @@
+
+public class Matrix4f {
+	float xx, xy, xz, xt, yx, yy, yz, yt, zx, zy, zz, zt, tx, ty, tz, tt;
+
+	public Matrix4f(float xx, float xy, float xz, float xt, float yx, float yy, float yz, float yt, float zx, float zy,
+			float zz, float zt, float tx, float ty, float tz, float tt) {
+		super();
+		this.xx = xx;
+		this.xy = xy;
+		this.xz = xz;
+		this.xt = xt;
+		this.yx = yx;
+		this.yy = yy;
+		this.yz = yz;
+		this.yt = yt;
+		this.zx = zx;
+		this.zy = zy;
+		this.zz = zz;
+		this.zt = zt;
+		this.tx = tx;
+		this.ty = ty;
+		this.tz = tz;
+		this.tt = tt;
+	}
+
+	public Matrix4f(double xx, double xy, double xz, double xt, double yx, double yy, double yz, double yt, double zx,
+			double zy, double zz, double zt, double tx, double ty, double tz, double tt) {
+		this((float) xx, (float) xy, (float) xz, (float) xt, (float) yx, (float) yy, (float) yz, (float) yt, (float) zx,
+				(float) zy, (float) zz, (float) zt, (float) tx, (float) ty, (float) tz, (float) tt);
+	}
+
+	static Matrix4f identity() {
+		return new Matrix4f(
+				1, 0, 0, 0, 
+				0, 1, 0, 0, 
+				0, 0, 1, 0, 
+				0, 0, 0, 1);
+	}
+
+	static Matrix4f rotatex(float r) {
+		return new Matrix4f(1, 0, 0, 0, 0, Math.cos(r), -Math.sin(r), 0, 0, Math.sin(r), Math.cos(r), 0, 0, 0, 0, 1);
+	}
+
+	static Matrix4f rotatey(float r) {
+		return new Matrix4f(Math.cos(r), 0, Math.sin(r), 0, 0, 1, 0, 0, -Math.sin(r), 0, Math.cos(r), 0, 0, 0, 0, 1);
+	}
+
+	static Matrix4f rotatez(float r) {
+		return new Matrix4f(Math.cos(r), -Math.sin(r), 0, 0, Math.sin(r), Math.cos(r), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+	}
+
+	static Matrix4f translate(float x, float y, float z) {
+		return new Matrix4f(
+				1, 0, 0, x, 
+				0, 1, 0, y,
+				0, 0, 1, z,
+				0, 0, 0, 1);
+	}
+
+	public Matrix4f mult(Matrix4f that){
+		Matrix4f result = identity();
+		result.xx = this.xx * that.xx + this.xy * that.yx + this.xz * that.zx + this.xt * that.tx;
+		result.yx = this.yx * that.xx + this.yy * that.yx + this.yz * that.zx + this.yt * that.tx;
+		result.zx = this.zx * that.xx + this.zy * that.yx + this.zz * that.zx + this.zt * that.tx;
+		result.tx = this.tx * that.xx + this.ty * that.yx + this.tz * that.zx + this.tt * that.tx;
+		
+		result.xy = this.xx * that.xy + this.xy * that.yy + this.xz * that.zy + this.xt * that.ty;
+		result.yy = this.yx * that.xy + this.yy * that.yy + this.yz * that.zy + this.yt * that.ty;
+		result.zy = this.zx * that.xy + this.zy * that.yy + this.zz * that.zy + this.zt * that.ty;
+		result.ty = this.tx * that.xy + this.ty * that.yy + this.tz * that.zy + this.tt * that.ty;
+		
+		result.xz = this.xx * that.xz + this.xy * that.yz + this.xz * that.zz + this.xt * that.tz;
+		result.yz = this.yx * that.xz + this.yy * that.yz + this.yz * that.zz + this.yt * that.tz;
+		result.zz = this.zx * that.xz + this.zy * that.yz + this.zz * that.zz + this.zt * that.tz;
+		result.tz = this.tx * that.xz + this.ty * that.yz + this.tz * that.zz + this.tt * that.tz;
+		
+		result.xt = this.xx * that.xt + this.xy * that.yt + this.xz * that.zt + this.xt * that.tt;
+		result.yt = this.yx * that.xt + this.yy * that.yt + this.yz * that.zt + this.yt * that.tt;
+		result.zt = this.zx * that.xt + this.zy * that.yt + this.zz * that.zt + this.zt * that.tt;
+		result.tt = this.tx * that.xt + this.ty * that.yt + this.tz * that.zt + this.tt * that.tt;
+		return result;
+	}
+
+	public float[] flatten() {
+		float[] result = new float[16];
+		result[0]	= xx;
+		result[1]	= yx;
+		result[2] 	= zx;
+		result[3] 	= tx;
+		
+		result[4] 	= xy;
+		result[5] 	= yy;	
+		result[6] 	= zy;
+		result[7] 	= ty;
+		
+		result[8] 	= xz;
+		result[9] 	= yz;
+		result[10] 	= zz;
+		result[11] 	= tz;
+		
+		result[12] 	= xt;
+		result[13] 	= yt;
+		result[14] 	= zt;
+		result[15] 	= tt;
+		return result;
+	}
+
+	public Matrix4f rotx(float r) {
+		return this.mult(rotatex(r));
+	}
+
+	public Matrix4f roty(float r) {
+		return this.mult(rotatey(r));
+	}
+
+	public Matrix4f rotz(float r) {
+		return this.mult(rotatez(r));
+	}
+
+	public Matrix4f trans(float x, float y, float z) {
+		return this.mult(translate(x, y, z));
+	}
+}
