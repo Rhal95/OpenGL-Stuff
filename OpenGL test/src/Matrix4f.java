@@ -1,7 +1,18 @@
-
+/**
+ * @author Lukas
+ *
+ */
 public class Matrix4f {
+	/**
+	 * fields representing numbers in a 4x4 matrix. first letter if for the row and second for the column
+	 */
+	@SuppressWarnings("javadoc")
 	float xx, xy, xz, xt, yx, yy, yz, yt, zx, zy, zz, zt, tx, ty, tz, tt;
 
+	/**
+	 * constructor.
+	 */
+	@SuppressWarnings("javadoc")
 	public Matrix4f(float xx, float xy, float xz, float xt, float yx, float yy, float yz, float yt, float zx, float zy,
 			float zz, float zt, float tx, float ty, float tz, float tt) {
 		super();
@@ -23,12 +34,19 @@ public class Matrix4f {
 		this.tt = tt;
 	}
 
+	/**
+	 * convenience constructor for double->float conversion.
+	 */
+	@SuppressWarnings("javadoc")
 	public Matrix4f(double xx, double xy, double xz, double xt, double yx, double yy, double yz, double yt, double zx,
 			double zy, double zz, double zt, double tx, double ty, double tz, double tt) {
 		this((float) xx, (float) xy, (float) xz, (float) xt, (float) yx, (float) yy, (float) yz, (float) yt, (float) zx,
 				(float) zy, (float) zz, (float) zt, (float) tx, (float) ty, (float) tz, (float) tt);
 	}
 
+	/**
+	 * @return a new identity matrix
+	 */
 	static Matrix4f identity() {
 		return new Matrix4f(
 				1, 0, 0, 0, 
@@ -37,6 +55,10 @@ public class Matrix4f {
 				0, 0, 0, 1);
 	}
 
+	/**
+	 * @param r degree in radians to rotate 
+	 * @return a new rotation matrix
+	 */
 	static Matrix4f rotx_Mat(float r) {
 		return new Matrix4f(
 				1, 0, 0, 0, 
@@ -45,6 +67,10 @@ public class Matrix4f {
 				0, 0, 0, 1);
 	}
 
+	/**
+	 * @param r degree in radians to rotate 
+	 * @return a new rotation matrix
+	 */
 	static Matrix4f roty_Mat(float r) {
 		return new Matrix4f(
 				Math.cos(r), 0, Math.sin(r), 0, 
@@ -53,6 +79,10 @@ public class Matrix4f {
 				0, 0, 0, 1);
 	}
 
+	/**
+	 * @param r degree in radians to rotate 
+	 * @return a new rotation matrix
+	 */
 	static Matrix4f rotz_Mat(float r) {
 		return new Matrix4f(
 				Math.cos(r), -Math.sin(r), 0, 0, 
@@ -61,6 +91,13 @@ public class Matrix4f {
 				0, 0, 0, 1);
 	}
 
+	
+	/**
+	 * @param x translation in x direction
+	 * @param y translation in y direction
+	 * @param z translation in z direction
+	 * @return a new translation matrix
+	 */
 	static Matrix4f trans_Mat(float x, float y, float z) {
 		return new Matrix4f(
 				1, 0, 0, x, 
@@ -69,6 +106,12 @@ public class Matrix4f {
 				0, 0, 0, 1);
 	}
 
+	/**
+	 * @param x scaling factor along x axis
+	 * @param y scaling factor along x axis
+	 * @param z scaling factor along x axis
+	 * @return a new scaling matrix
+	 */
 	static Matrix4f scale_Mat(float x, float y, float z){
 		return new Matrix4f(
 				x, 0, 0, 0, 
@@ -78,6 +121,10 @@ public class Matrix4f {
 	}
 	
 	
+	/**
+	 * @param that matrix to multiply with
+	 * @return a new matrix representing this * that
+	 */
 	public Matrix4f mult(Matrix4f that){
 		Matrix4f result = identity();
 		result.xx = this.xx * that.xx + this.xy * that.yx + this.xz * that.zx + this.xt * that.tx;
@@ -102,6 +149,9 @@ public class Matrix4f {
 		return result;
 	}
 
+	/**
+	 * @return a new array with the matrix data
+	 */
 	public float[] flatten() {
 		float[] result = new float[16];
 		result[0]	= xx;
@@ -126,22 +176,45 @@ public class Matrix4f {
 		return result;
 	}
 
+	/**
+	 * @param r degree of rotation in radians
+	 * @return a new matrix representing this * rotx_Mat(r)
+	 */
 	public Matrix4f rotx(float r) {
 		return this.mult(rotx_Mat(r));
 	}
-
+	/**
+	 * @param r degree of rotation in radians
+	 * @return a new matrix representing this * roty_Mat(r)
+	 */
 	public Matrix4f roty(float r) {
 		return this.mult(roty_Mat(r));
 	}
-
+	/**
+	 * @param r degree of rotation in radians
+	 * @return a new matrix representing this * rotz_Mat(r)
+	 */
 	public Matrix4f rotz(float r) {
 		return this.mult(rotz_Mat(r));
 	}
 
+	
+	/**
+	 * @param x translation in x direction
+	 * @param y translation in y direction
+	 * @param z translation in z direction
+	 * @return a new translation matrix representing this * trans_Mat(x,y,z)
+	 */
 	public Matrix4f trans(float x, float y, float z) {
 		return this.mult(trans_Mat(x, y, z));
 	}
 	
+	/**
+	 * @param x scaling factor along x axis
+	 * @param y scaling factor along x axis
+	 * @param z scaling factor along x axis
+	 * @return a new scaling matrix representing this * scale_Mat(x,y,z)
+	 */
 	public Matrix4f scale(float x, float y, float z){
 		return this.mult(scale_Mat(x, y, z));
 	}
