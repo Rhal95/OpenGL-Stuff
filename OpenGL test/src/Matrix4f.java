@@ -37,19 +37,31 @@ public class Matrix4f {
 				0, 0, 0, 1);
 	}
 
-	static Matrix4f rotatex(float r) {
-		return new Matrix4f(1, 0, 0, 0, 0, Math.cos(r), -Math.sin(r), 0, 0, Math.sin(r), Math.cos(r), 0, 0, 0, 0, 1);
+	static Matrix4f rotx_Mat(float r) {
+		return new Matrix4f(
+				1, 0, 0, 0, 
+				0, Math.cos(r), -Math.sin(r), 0, 
+				0, Math.sin(r), Math.cos(r), 0, 
+				0, 0, 0, 1);
 	}
 
-	static Matrix4f rotatey(float r) {
-		return new Matrix4f(Math.cos(r), 0, Math.sin(r), 0, 0, 1, 0, 0, -Math.sin(r), 0, Math.cos(r), 0, 0, 0, 0, 1);
+	static Matrix4f roty_Mat(float r) {
+		return new Matrix4f(
+				Math.cos(r), 0, Math.sin(r), 0, 
+				0, 1, 0, 0, 
+				-Math.sin(r), 0, Math.cos(r), 0, 
+				0, 0, 0, 1);
 	}
 
-	static Matrix4f rotatez(float r) {
-		return new Matrix4f(Math.cos(r), -Math.sin(r), 0, 0, Math.sin(r), Math.cos(r), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+	static Matrix4f rotz_Mat(float r) {
+		return new Matrix4f(
+				Math.cos(r), -Math.sin(r), 0, 0, 
+				Math.sin(r), Math.cos(r), 0, 0, 
+				0, 0, 1, 0, 
+				0, 0, 0, 1);
 	}
 
-	static Matrix4f translate(float x, float y, float z) {
+	static Matrix4f trans_Mat(float x, float y, float z) {
 		return new Matrix4f(
 				1, 0, 0, x, 
 				0, 1, 0, y,
@@ -57,6 +69,15 @@ public class Matrix4f {
 				0, 0, 0, 1);
 	}
 
+	static Matrix4f scale_Mat(float x, float y, float z){
+		return new Matrix4f(
+				x, 0, 0, 0, 
+				0, y, 0, 0, 
+				0, 0, z, 0, 
+				0, 0, 0, 1);
+	}
+	
+	
 	public Matrix4f mult(Matrix4f that){
 		Matrix4f result = identity();
 		result.xx = this.xx * that.xx + this.xy * that.yx + this.xz * that.zx + this.xt * that.tx;
@@ -106,18 +127,22 @@ public class Matrix4f {
 	}
 
 	public Matrix4f rotx(float r) {
-		return this.mult(rotatex(r));
+		return this.mult(rotx_Mat(r));
 	}
 
 	public Matrix4f roty(float r) {
-		return this.mult(rotatey(r));
+		return this.mult(roty_Mat(r));
 	}
 
 	public Matrix4f rotz(float r) {
-		return this.mult(rotatez(r));
+		return this.mult(rotz_Mat(r));
 	}
 
 	public Matrix4f trans(float x, float y, float z) {
-		return this.mult(translate(x, y, z));
+		return this.mult(trans_Mat(x, y, z));
+	}
+	
+	public Matrix4f scale(float x, float y, float z){
+		return this.mult(scale_Mat(x, y, z));
 	}
 }

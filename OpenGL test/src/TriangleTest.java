@@ -35,7 +35,7 @@ import static org.lwjgl.opengl.GLCapabilities.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
-public class Screen {
+public class TriangleTest {
 
 	private static long window;
 
@@ -52,7 +52,7 @@ public class Screen {
 	long timestart;
 	long timenow;
 
-	public Screen() throws IOException {
+	public TriangleTest() throws IOException {
 		List<String> vs = Files.readAllLines(new File("src/vertexShader.txt").toPath());
 		StringBuilder vb = new StringBuilder();
 		for (String s : vs) {
@@ -130,21 +130,21 @@ public class Screen {
 		glBindVertexArray(vao);
 
 		buildGeometry();
-		
-		
+
+
 		try (MemoryStack stack = MemoryStack.stackPush()) {
 
 			FloatBuffer verts = stack.mallocFloat(vert_List.size());
 			IntBuffer elements = stack.mallocInt(elem_List.size());
 
-			for(int i = 0; i < vert_List.size(); i+=3){
-				verts.put(vert_List.get(i+0));
-				verts.put(vert_List.get(i+1));
-				verts.put(vert_List.get(i+2));
+			for (int i = 0; i < vert_List.size(); i += 3) {
+				verts.put(vert_List.get(i + 0));
+				verts.put(vert_List.get(i + 1));
+				verts.put(vert_List.get(i + 2));
 			}
-				
+
 			verts.position(0);
-			
+
 			for (int i : elem_List)
 				elements.put(i);
 			elements.position(0);
@@ -192,13 +192,12 @@ public class Screen {
 			int colAttrib = glGetAttribLocation(shaderProgram, "color");
 			glEnableVertexAttribArray(colAttrib);
 			glVertexAttribPointer(colAttrib, 3, GL_FLOAT, false, 6 * Float.BYTES, 3 * Float.BYTES);
-			
+
 			int modelAttrib = glGetUniformLocation(shaderProgram, "model");
 
-			
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_BACK);
-			
+			//glEnable(GL_CULL_FACE);
+			//glCullFace(GL_BACK);
+
 			timestart = System.currentTimeMillis();
 			while (!glfwWindowShouldClose(window)) {
 				glClearColor(0f, 0f, 0f, 1f);
@@ -216,15 +215,16 @@ public class Screen {
 	}
 
 	private void calcTransform(int modelAttrib) {
-		float[] model = Matrix4f.identity().mult(Matrix4f.translate(0, 0, 0)).rotx(rotx).roty(roty).flatten();
+		float[] model = Matrix4f.identity().mult(Matrix4f.trans_Mat(0, 0, 0)).rotx(rotx).roty(roty).flatten();
 
 		glUniformMatrix4fv(modelAttrib, false, model);
 	}
 
 	private void buildGeometry() {
-		cube(-0.5f, -0.5f, 0f, 0.5f, Color.BLUE);
+		 cube(-0.5f, -0.5f, 0f, 0.5f, Color.BLUE);
 		cube(0.5f, 0.5f, 0f, 0.5f, Color.RED);
-		plane(-0.75f, -0.25f, -0.25f, -0.25f, -0.75f, -0.25f, 0.25f, 0.25f, 0.25f, Color.GREEN);
+		 plane(-0.75f, -0.25f, -0.25f, -0.25f, -0.75f, -0.25f, 0.25f, 0.25f,
+		 0.25f, Color.GREEN);
 	}
 
 	private void cube(float x, float y, float z, float size, Color c) {
@@ -233,68 +233,68 @@ public class Screen {
 		vert_List.add(x - r); // 0
 		vert_List.add(y - r); // 0 0 0
 		vert_List.add(z - r);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
 
 		vert_List.add(x - r); // 1
 		vert_List.add(y - r); // 0 0 1
 		vert_List.add(z + r);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
-		
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
+
 		vert_List.add(x - r); // 2
 		vert_List.add(y + r); // 0 1 0
 		vert_List.add(z - r);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
 
 		vert_List.add(x - r); // 3
 		vert_List.add(y + r); // 0 1 1
 		vert_List.add(z + r);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
 
 		vert_List.add(x + r); // 4
 		vert_List.add(y - r); // 1 0 0
 		vert_List.add(z - r);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
 
 		vert_List.add(x + r); // 5
 		vert_List.add(y - r); // 1 0 1
 		vert_List.add(z + r);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
 
 		vert_List.add(x + r); // 6
 		vert_List.add(y + r); // 1 1 0
 		vert_List.add(z - r);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
 
 		vert_List.add(x + r); // 7
 		vert_List.add(y + r); // 1 1 1
 		vert_List.add(z + r);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
 
-		//Down
+		// Down
 		elem_List.add(pos + 0);
 		elem_List.add(pos + 2);
 		elem_List.add(pos + 6);
-		elem_List.add(pos + 6); 
+		elem_List.add(pos + 6);
 		elem_List.add(pos + 4);
 		elem_List.add(pos + 0);
 
-		//Up
+		// Up
 		elem_List.add(pos + 7);
 		elem_List.add(pos + 3);
 		elem_List.add(pos + 1);
@@ -302,7 +302,7 @@ public class Screen {
 		elem_List.add(pos + 5);
 		elem_List.add(pos + 7);
 
-		//Left
+		// Left
 		elem_List.add(pos + 0);
 		elem_List.add(pos + 4);
 		elem_List.add(pos + 5);
@@ -310,7 +310,7 @@ public class Screen {
 		elem_List.add(pos + 1);
 		elem_List.add(pos + 0);
 
-		//Back
+		// Back
 		elem_List.add(pos + 0);
 		elem_List.add(pos + 1);
 		elem_List.add(pos + 3);
@@ -318,7 +318,7 @@ public class Screen {
 		elem_List.add(pos + 2);
 		elem_List.add(pos + 0);
 
-		//Right
+		// Right
 		elem_List.add(pos + 7);
 		elem_List.add(pos + 6);
 		elem_List.add(pos + 2);
@@ -326,7 +326,7 @@ public class Screen {
 		elem_List.add(pos + 3);
 		elem_List.add(pos + 7);
 
-		//Front
+		// Front
 		elem_List.add(pos + 7);
 		elem_List.add(pos + 5);
 		elem_List.add(pos + 4);
@@ -335,28 +335,29 @@ public class Screen {
 		elem_List.add(pos + 7);
 	}
 
-	private void plane(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, Color c) {
+	private void plane(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3,
+			Color c) {
 		int pos = vert_List.size() / 6;
 		vert_List.add(x1);
 		vert_List.add(y1);
 		vert_List.add(z1);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
-		
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
+
 		vert_List.add(x2);
 		vert_List.add(y2);
 		vert_List.add(z2);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
-		
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
+
 		vert_List.add(x3);
 		vert_List.add(y3);
 		vert_List.add(z3);
-		vert_List.add(255f/c.getRed());
-		vert_List.add(255f/c.getGreen());
-		vert_List.add(255f/c.getBlue());
+		vert_List.add(255f / c.getRed());
+		vert_List.add(255f / c.getGreen());
+		vert_List.add(255f / c.getBlue());
 
 		elem_List.add(pos);
 		elem_List.add(pos + 1);
@@ -365,7 +366,7 @@ public class Screen {
 
 	public static void main(String[] args) {
 		try {
-			new Screen().run();
+			new TriangleTest().run();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
