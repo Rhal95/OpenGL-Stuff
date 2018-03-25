@@ -59,4 +59,9 @@ public class Vec3f {
 	public Vec3f mult(float s) {
 		return new Vec3f(x * s, y * s, z * s);
 	}
+	
+	@Override
+	public String toString() {
+		return "(" + x + ", " + y +", " + z +")";
+	}
 }

@@ -1,50 +1,59 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class Curve {
-	Vec3f[] pts;
-	int[] ts;
+	Vec3f[] controlPoints; // length n
+	int[] knots;
+	int degree;
 
-	
-	public Curve(Vec3f[] pts, int[] ts) {
+	public Curve(Vec3f[] points, int[] knots, int degree) {
 		super();
-		this.pts = pts;
-		this.ts = ts;
+		this.controlPoints = points;
+		this.knots = knots;
+		this.degree = degree;
 	}
 
-	public static Vec3f[] array(Vec3f...vec3fs){
+	public static Vec3f[] array(Vec3f... vec3fs) {
 		return vec3fs;
 	}
-	
-	public static int[] array(int...is ){
+
+	public static int[] array(int... is) {
 		return is;
 	}
 
-	
-	List<Vec3f> bezier(float res) {
-		List<Vec3f> result = new ArrayList<>();
-
-		for (double i = 0; i <= 1; i += res) {
-			float t = (float) i;
-			result.add(pts[0].mult((1 - t) * (1 - t) * (1 - t)).plus(pts[1].mult(3 * (1 - t) * (1 - t) * t))
-					.plus(pts[2].mult(3 * (1 - t) * t * t)).plus(pts[3].mult(t * t * t)));
+	Vec3f deBoor(int r, int i, float t) {
+		Vec3f result;
+		if (r == 0) {
+			result = controlPoints[i];
+		} else {
+			float a = (t - knots[i]) / (knots[i + 1 + degree - r] - knots[i]);
+			result = deBoor(r - 1, i - 1, t).mult(1 - a).plus(deBoor(r - 1, i, t).mult(a));
 		}
-		
 		return result;
-
 	}
-	
-	List<Vec3f> bspline(float res) {
+
+	List<Vec3f> curve(float res) {
 		List<Vec3f> result = new ArrayList<>();
 
-		for (double i = 0; i <= 1; i += res) {
-			float t = (float) i;
-			result.add(pts[0].mult((1 - t) * (1 - t) * (1 - t)).plus(pts[1].mult(3 * (1 - t) * (1 - t) * t))
-					.plus(pts[2].mult(3 * (1 - t) * t * t)).plus(pts[3].mult(t * t * t)));
+		for (float x = degree; x < controlPoints.length; x = x + res) {
+			int k = 0;
+			k = findIndex(x);
+			Vec3f pt = deBoor(degree, k, x);
+			result.add(pt);
 		}
-		
-		return result;
 
+		return result;
+	}
+
+	private int findIndex(float x) {
+		for (int i = 1; i < knots.length-1; i++) {
+			if(x < knots[i]) return i-1;
+			else if(x == knots[knots.length-1])
+				return knots.length-1;
+		}
+		return -1;
 	}
 
 }
