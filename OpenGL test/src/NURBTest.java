@@ -8,6 +8,8 @@ import java.nio.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -32,7 +34,7 @@ public class NURBTest {
 	 * readability. Contains position and color info. in the order {x, y, z, r, g,
 	 * b} for each point. Normals will be added some time.
 	 */
-	private List<Float> vert_List = new ArrayList<>();
+	private List<ColorPoint> vert_List = new ArrayList<>();
 	/**
 	 * List which specifies the order in which vertices are passed to the GPU.
 	 */
@@ -58,10 +60,29 @@ public class NURBTest {
 
 	private IntBuffer elements;
 
-	Vec3f[] pts = { new Vec3f(-0.5f, -0.5f, -0.5f), new Vec3f(-0.5f, 0.5f, 0), new Vec3f(0.5f, 0.5f, 0),
-			new Vec3f(0.5f, -0.5f, -0.5f), new Vec3f(0f, -0.75f, 0f), new Vec3f(-0.75f, 0f, 0f), new Vec3f(0f, 0.75f,0f) };
+	Vec3f[] pts = { new Vec3f(0.3f, 0.2f, 0f), new Vec3f(-0.3f, -1f, 0), new Vec3f(-0.8f, 0.0f, 0),
+			new Vec3f(-0.3f, 0.3f, 0f), new Vec3f(0.2f, 0.3f, 0f), new Vec3f(0f, -1f, 0f),
+			new Vec3f(-0.3f, 0.75f, 0f) };
 
 	int selected = 0;
+
+	private int modelAttrib;
+
+	private int vao;
+
+	private int ebo;
+
+	private int vbo;
+
+	private int vert_shader;
+
+	private int frag_shader;
+
+	private int shaderProgram;
+
+	private int posAttrib;
+
+	private int colAttrib;
 
 	/**
 	 * @throws IOException
@@ -138,6 +159,11 @@ public class NURBTest {
 			if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
 				selected = (selected + 1) % pts.length;
 			}
+			if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+				for (Vec3f v : pts) {
+					System.out.println(v);
+				}
+			}
 		});
 
 		try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -148,25 +174,38 @@ public class NURBTest {
 			glfwGetWindowSize(window, width, height);
 			GLFW.glfwSetWindowPos(window, (vidmode.width() - width.get()) / 2, (vidmode.height() - height.get()) / 2);
 		}
-	}
 
-	/**
-	 * Main loop. Builds the scene and runs the loop itself. Should be refactored to
-	 * only include the loop itself.
-	 */
-	public void loop() {
 		GL.createCapabilities();
 
-		int vao = glGenVertexArrays();
+		glEnable(GL_POINT_SIZE);
+
+		vao = glGenVertexArrays();ebo = glGenBuffers();vbo = glGenBuffers();
 		glBindVertexArray(vao);
 
-		int ebo = glGenBuffers();
+		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-		int vbo = glGenBuffers();
+		
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		buildGeometry();
+		
+		
+		verts = FloatBuffer.allocate(vert_List.size() * 6);
+		
+		elements = IntBuffer.allocate(elem_List.size());
+		for (ColorPoint cp : vert_List) {
+			verts.put(cp.flatten(), 0, 6);
+		}
+		verts.position(0);
+		for (int i : elem_List)
+			elements.put(i);
+		elements.position(0);
 
-		int vert_shader = glCreateShader(GL_VERTEX_SHADER);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, verts, GL_STATIC_DRAW);
+
+		
+		vert_shader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vert_shader, vertex_Shader);
 		glCompileShader(vert_shader);
 		int[] vert_status = new int[1];
@@ -175,7 +214,7 @@ public class NURBTest {
 			System.err.println(glGetShaderInfoLog(vert_shader));
 		}
 
-		int frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+		frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(frag_shader, fragment_Shader);
 		glCompileShader(frag_shader);
 		int[] frag_status = new int[1];
@@ -184,7 +223,7 @@ public class NURBTest {
 			System.err.println(glGetShaderInfoLog(frag_shader));
 		}
 
-		int shaderProgram = glCreateProgram();
+		shaderProgram = glCreateProgram();
 		glAttachShader(shaderProgram, vert_shader);
 		glAttachShader(shaderProgram, frag_shader);
 
@@ -194,46 +233,39 @@ public class NURBTest {
 
 		glUseProgram(shaderProgram);
 
-		int posAttrib = glGetAttribLocation(shaderProgram, "position");
+		posAttrib = glGetAttribLocation(shaderProgram, "position");
 		glEnableVertexAttribArray(posAttrib);
 		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, false, 6 * Float.BYTES, 0 * Float.BYTES);
 
-		int colAttrib = glGetAttribLocation(shaderProgram, "color");
+		colAttrib = glGetAttribLocation(shaderProgram, "color");
 		glEnableVertexAttribArray(colAttrib);
 		glVertexAttribPointer(colAttrib, 3, GL_FLOAT, false, 6 * Float.BYTES, 3 * Float.BYTES);
 
-		int modelAttrib = glGetUniformLocation(shaderProgram, "model");
+		modelAttrib = glGetUniformLocation(shaderProgram, "model");
+	
+
+		
+
+	}
+
+	/**
+	 * Main loop. Builds the scene and runs the loop itself. Should be refactored to
+	 * only include the loop itself.
+	 */
+	public void loop() {
 
 		while (!glfwWindowShouldClose(window)) {
-			try (MemoryStack stack = MemoryStack.stackPush()) {
-				buildGeometry();
-				verts = stack.mallocFloat(vert_List.size());
-				elements = stack.mallocInt(elem_List.size());
-				for (int i = 0; i < vert_List.size(); i += 3) {
-					verts.put(vert_List.get(i + 0));
-					verts.put(vert_List.get(i + 1));
-					verts.put(vert_List.get(i + 2));
-				}
+		
+			glClearColor(0f, 0f, 0.25f, 1f);
+			glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-				verts.position(0);
-				for (int i : elem_List)
-					elements.put(i);
-				elements.position(0);
+			calcTransform(modelAttrib);
 
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements, GL_STATIC_DRAW);
-				glBufferData(GL_ARRAY_BUFFER, verts, GL_STATIC_DRAW);
+			glDrawElements(GL_LINE_STRIP, elem_List.size(), GL_UNSIGNED_INT, 0);
 
-				glClearColor(0f, 0f, 0f, 1f);
-				glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+			glfwSwapBuffers(window);
+			glfwPollEvents();
 
-				calcTransform(modelAttrib);
-
-				glDrawElements(GL_LINE_STRIP, elem_List.size(), GL_UNSIGNED_INT, 0);
-
-				glfwSwapBuffers(window);
-				glfwPollEvents();
-
-			}
 		}
 
 	}
@@ -257,17 +289,12 @@ public class NURBTest {
 		vert_List.clear();
 		elem_List.clear();
 
-		int[] e = Curve.array(0,1,2,3,4,5,6,7,8,9,10);
-		Curve c = new Curve(pts, e, 2);
+		int[] e = Curve.array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+		Curve c = new Curve(pts, e, 3);
 		List<Vec3f> l = c.curve(0.0625f);
 		for (Vec3f v : l) {
-			elem_List.add(vert_List.size() / 6);
-			vert_List.add(v.x);
-			vert_List.add(v.y);
-			vert_List.add(v.z);
-			vert_List.add(1f);
-			vert_List.add(1f);
-			vert_List.add(1f);
+			elem_List.add(vert_List.size());
+			vert_List.add(new ColorPoint(v, new Vec3f(1f, 1, 0)));
 		}
 
 	}
