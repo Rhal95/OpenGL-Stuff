@@ -67,7 +67,7 @@ public class Curve {
 	 *         https://en.wikipedia.org/wiki/De_Boor's_algorithm
 	 * 
 	 */
-	private Vec3f deBoor(int r, int i, float t) {
+	protected Vec3f deBoor(int r, int i, float t) {
 		Vec3f result;
 		if (r == 0) {
 			result = controlPoints[i];
@@ -104,7 +104,7 @@ public class Curve {
 	 * @return the found index or -1 if nothing was found function for finding the
 	 *         knots-array index for which knots[i-1] <= x <= knots[i]
 	 */
-	private int findIndex(float x) {
+	protected int findIndex(float x) {
 		for (int i = 1; i < knots.length - 1; i++) {
 			if (x < knots[i])
 				return i - 1;
