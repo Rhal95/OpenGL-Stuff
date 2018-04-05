@@ -1,3 +1,4 @@
+package rhal95.opengl;
 
 public class Vec4f extends Vec3f {
 	float t;

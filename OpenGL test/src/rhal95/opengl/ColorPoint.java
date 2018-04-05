@@ -1,3 +1,4 @@
+package rhal95.opengl;
 import java.util.Arrays;
 
 public class ColorPoint {

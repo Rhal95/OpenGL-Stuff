@@ -1,3 +1,4 @@
+package rhal95.opengl;
 
 /**
  * @author Lukas

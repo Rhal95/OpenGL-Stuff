@@ -1,3 +1,4 @@
+package rhal95.opengl;
 
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
@@ -50,28 +51,59 @@ public abstract class AbstractGLApplication {
 	 */
 	String fragment_Shader;
 
+	/**
+	 * Buffer for the vertices (position and color)
+	 */
 	FloatBuffer verts;
 
+	/**
+	 * buffer for the elements (order of drawn vertices)
+	 */
 	IntBuffer elements;
 
-	Vec3f[] pts;
-
+	/**
+	 * The Attribute for loading the model matrix in the shader
+	 */
 	int modelAttrib;
 
+	/**
+	 * Vertex Array Buffer
+	 */
 	int vao;
 
+	/**
+	 * Element Buffer Object
+	 */
 	int ebo;
 
+	/**
+	 * Vertex Buffer Object
+	 */
 	int vbo;
 
+	/**
+	 * The index for using the vertex shader
+	 */
 	int vert_shader;
 
+	/**
+	 * The index for using the fragment shader
+	 */
 	int frag_shader;
 
+	/**
+	 * the index for using the shader program
+	 */
 	int shaderProgram;
 
+	/**
+	 * the index for loading position to the vertex shader
+	 */
 	int posAttrib;
 
+	/**
+	 * the index for loading color to the vertex shader
+	 */
 	int colAttrib;
 
 	/**
@@ -124,6 +156,8 @@ public abstract class AbstractGLApplication {
 
 		GL.createCapabilities();
 
+		glSettings();
+		
 		vert_shader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vert_shader, vertex_Shader);
 		glCompileShader(vert_shader);
@@ -194,6 +228,8 @@ public abstract class AbstractGLApplication {
 		glEnableVertexAttribArray(colAttrib);
 	}
 
+	abstract void glSettings();
+
 	/**
 	 * Main loop.
 	 */
@@ -224,5 +260,8 @@ public abstract class AbstractGLApplication {
 	 */
 	abstract void buildGeometry();
 
+	/**
+	 * @returna GLFWKeyCallbackI function which handles the input
+	 */
 	public abstract GLFWKeyCallbackI keyHandler();
 }
