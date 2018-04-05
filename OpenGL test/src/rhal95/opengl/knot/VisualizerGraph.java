@@ -1,16 +1,14 @@
 package rhal95.opengl.knot;
+
 import java.nio.FloatBuffer;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class VisualizerGraph {
-	public double X_CLOSENESS = 1;
-	public double Y_CLOSENESS = 0.5;
-	public float SCALE = 0.2f;
-	public double X_LOOP_SIZE = 0.5;
-	public double Y_LOOP_SIZE = 0.5;
-	public int POINTS_PER_LOOP = 5;
+import rhal95.opengl.Vec3f;
+import rhal95.opengl.Vec4f;
+
+public class VisualizerGraph implements Iterable<VisualizerGraphNode> {
 	VisualizerGraphNode first;
 	int length;
 	int max_width;
@@ -88,39 +86,53 @@ public class VisualizerGraph {
 		return length;
 	}
 
-	public void calculatePoints(FloatBuffer points) {
-		VisualizerGraphNode current = first;
-		int x_coord = 0;
-		int y_coord = 0;
-		boolean dir = true;
-		while (current.nextNode != null) {
-			double angle = 2 * Math.PI / POINTS_PER_LOOP;
-			for (int i = 0; i < POINTS_PER_LOOP; i++) {
-				for (int j = 0; j < 3; j++) {
-					if (dir)
-						points.put((float) ((x_coord * X_CLOSENESS - max_width * X_CLOSENESS / 2)
-								- Math.sin((i + 0.5) * angle) * X_LOOP_SIZE) * SCALE)
-								.put((float) ((y_coord * Y_CLOSENESS - max_height * Y_CLOSENESS / 2)
-										- Math.cos((i + 0.5) * angle) * Y_LOOP_SIZE) * SCALE)
-								.put(0.0f);
-					else
-						points.put((float) ((x_coord * X_CLOSENESS - max_width * X_CLOSENESS / 2)
-								- Math.sin(-(i + 2) * angle) * X_LOOP_SIZE) * SCALE)
-								.put((float) ((y_coord * Y_CLOSENESS - max_height * Y_CLOSENESS / 2)
-										- Math.cos(-(i + 2) * angle) * Y_LOOP_SIZE) * SCALE)
-								.put(0.0f);
-				}
+	public Vec4f[] calculatePoints() {
+		List<Vec4f> result = new LinkedList<>();
+		float number = 0;
+		float row = 1;
+		result.add(new Vec4f(0, 0, 0));
+		for (VisualizerGraphNode n : this) {
+			if (number % 2 == 0)
+				number += 2;
+			else
+				number -= 2;
+			if (n.bottomNodes.contains(n.previousNode)) {
+				result.add(new Vec4f(number-max_width/2, row-max_height/2, 0, 3));
+
+			}
+			result.add(new Vec4f(number-max_width/2, row-max_height/2, 0, 3));
+			if (row % 2 == 0) {
+				result.add(new Vec4f(number - 0.5f-max_width/2, row-max_height/2 + 1f, 0, 1));
+				result.add(new Vec4f(number + 0.5f-max_width/2, row-max_height/2 + 1f, 0, 1));
+			} else {
+				result.add(new Vec4f(number + 0.5f-max_width/2, row-max_height/2 + 1f, 0, 1));
+				result.add(new Vec4f(number - 0.5f-max_width/2, row-max_height/2 + 1f, 0, 1));
+
+			}
+			result.add(new Vec4f(number-max_width/2, row-max_height/2, 0, 3));
+		}
+		Vec4f[] l = new Vec4f[result.size()];
+		result.toArray(l);
+		return l;
+	}
+
+	@Override
+	public Iterator<VisualizerGraphNode> iterator() {
+		return new Iterator<VisualizerGraphNode>() {
+			VisualizerGraphNode next = first;
+
+			@Override
+			public boolean hasNext() {
+				return next != null;
 			}
 
-			if (current.nextNode != null && current.topNodes.contains(current.nextNode)) {
-				y_coord += 1;
-				dir = !dir;
-			} else if (dir) {
-				x_coord += 1;
-			} else
-				x_coord -= 1;
-			current = current.nextNode;
-		}
-		points.rewind();
+			@Override
+			public VisualizerGraphNode next() {
+				VisualizerGraphNode result = next;
+				next = next.nextNode;
+				return result;
+			}
+
+		};
 	}
 }

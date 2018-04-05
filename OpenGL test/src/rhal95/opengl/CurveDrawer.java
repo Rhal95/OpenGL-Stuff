@@ -26,26 +26,28 @@ import static org.lwjgl.system.MemoryUtil.*;
  */
 public class CurveDrawer extends AbstractGLApplication {
 
-	/** rotation around x axis. */
-	private float rotx = 0;
-	/** rotation around y axis. */
-	private float roty = 0;
-	/** rotation around z axis. */
-	private float rotz = 0;
-
 	Vec4f[] pts;
 	int[] knots;
 	int selected = 0;
-
+	int degree;
+	float resolution;
+	
+	float x=0,y=0,z=0;
+	
 	boolean changed = true;
+	private float rx;
+	private float ry;
+	private float rz;
 
 	/**
 	 * @throws IOException
 	 *             We are reading the shaders from a extern file. Reading the
 	 *             shaders. Could also be done in a normal function.
 	 */
-	public CurveDrawer(Vec4f[] pts, int[] knots) throws IOException {
+	public CurveDrawer(Vec4f[] pts, int[] knots, int degree, float resolution) throws IOException {
 		this.pts = pts;
+		this.degree = degree;
+		this.resolution = resolution;
 		this.knots = knots;
 		List<String> vs = Files.readAllLines(new File("src/vertexShader.txt").toPath());
 		StringBuilder vb = new StringBuilder();
@@ -114,8 +116,7 @@ public class CurveDrawer extends AbstractGLApplication {
 	 *            the world transformation.
 	 */
 	void calcTransform(int modelAttrib) {
-		float[] model = Matrix4f.identity().mult(Matrix4f.trans_Mat(0, 0, 0)).rotx(rotx).roty(roty).rotz(rotz)
-				.flatten();
+		float[] model = Matrix4f.identity().mult(Matrix4f.trans_Mat(x, y, z)).scale(0.1f, 0.1f, 0.1f).rotx(rx).roty(ry).rotz(rz).flatten();
 
 		glUniformMatrix4fv(modelAttrib, false, model);
 	}
@@ -127,8 +128,8 @@ public class CurveDrawer extends AbstractGLApplication {
 		vert_List.clear();
 		elem_List.clear();
 
-		Curve c = new NURBS(pts, knots, 3);
-		List<Vec3f> l = c.curve(0.0625f);
+		Curve c = new NURBS(pts, knots, degree);
+		List<Vec3f> l = c.curve(resolution);
 		for (Vec3f v : l) {
 			elem_List.add(vert_List.size());
 			vert_List.add(new ColorPoint(v, new Vec3f(1f, 1, 0)));
@@ -136,23 +137,11 @@ public class CurveDrawer extends AbstractGLApplication {
 
 	}
 
-	/**
-	 * @param args
-	 *            Arguments. Main function to start the program.
-	 */
-	public static void main(String[] args) {
-		try {
-			new NURBTest().run();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
 
 	@Override
 	public GLFWKeyCallbackI keyHandler() {
 		return (window, key, scancode, action, mods) -> {
-			if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+			if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 				glfwSetWindowShouldClose(window, true);
 			}
 			if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
@@ -186,6 +175,42 @@ public class CurveDrawer extends AbstractGLApplication {
 			if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS) {
 				pts[selected].t -= 0.1;
 				changed = true;
+			}
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+				x += 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+				x -= 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+				y += 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+				y -= 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+				z += 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+				z -= 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+				rx += 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+				rx -= 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+				ry += 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+				ry -= 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+				rz += 0.1;
+			}
+			if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+				rz -= 0.1;
 			}
 			;
 		};
